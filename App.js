@@ -1,20 +1,71 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from "react";
+import { Button, FlatList, StyleSheet, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import GoalInput from "./components/GoalInput";
+import GoalItem from "./components/GoalItem";
 
 export default function App() {
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [goals, setGoals] = useState([]);
+
+  const showModal = () => setModalIsVisible(true);
+  const closeModal = () => setModalIsVisible(false);
+
+  const addGoalHandler = (input) => {
+    if (input) {
+      setGoals((current) => [...current, { text: input, id: Date.now() + Math.random().toString() }]);
+      closeModal();
+    }
+  };
+
+  const deleteGoalHandler = (id) => {
+    setGoals((current) => current.filter((goal) => goal.id !== id));
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <View style={styles.appContainer}>
+        <Button title="Add new goal" color={"#a065ec"} onPress={showModal} />
+        <GoalInput onAddGoal={addGoalHandler} visible={modalIsVisible} onClose={closeModal} />
+        <View style={styles.goalsContainer}>
+          <FlatList
+            data={goals}
+            alwaysBounceVertical={false}
+            keyExtractor={(item) => item.id}
+            renderItem={(itemData) => {
+              return <GoalItem item={itemData.item} onPress={deleteGoalHandler} />;
+            }}
+          ></FlatList>
+          <View style={{ marginVertical: 20 }}>
+            <Button
+              title="reset"
+              onPress={() => {
+                setGoals([]);
+              }}
+            />
+          </View>
+        </View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  appContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 50,
+    paddingHorizontal: 16,
+    backgroundColor: "#1e085a",
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    width: "70%",
+    marginRight: 8,
+    padding: 8,
+  },
+  goalsContainer: {
+    flex: 5,
   },
 });
